@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:data/rustdesk.db
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      password:
+      timeout: 3000ms
+
+  # Disable OAuth2 auto-configuration if no providers configured
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+
+rustdesk:
+  app:
+    show-swagger: true
+
+logging:
+  level:
+    root: INFO
+    com.rustdesk.api: DEBUG

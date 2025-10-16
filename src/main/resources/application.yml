@@ -1,0 +1,154 @@
+server:
+  port: 21114
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: rustdesk-api
+
+  profiles:
+    active: dev
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+
+  jpa:
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    encoding: UTF-8
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID:}
+            client-secret: ${GITHUB_CLIENT_SECRET:}
+            scope: read:user,user:email
+            redirect-uri: "{baseUrl}/api/oauth/callback"
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/api/oauth/callback"
+
+# RustDesk Configuration
+rustdesk:
+  app:
+    web-client: true
+    register: false
+    register-status: 1
+    show-swagger: false
+    disable-pwd-login: false
+
+  admin:
+    title: "RustDesk API Admin"
+    hello: "Welcome to RustDesk API Admin"
+    hello-file: ""
+
+  jwt:
+    secret: ${JWT_SECRET:}
+    expiration: 604800  # 7 days in seconds
+
+  security:
+    captcha-threshold: 3
+    ban-threshold: 5
+    attempts-window: 600  # 10 minutes in seconds
+    ban-duration: 1800    # 30 minutes in seconds
+    captcha-expire: 300   # 5 minutes in seconds
+
+  token:
+    expire: 604800  # 7 days in seconds
+
+  rustdesk-server:
+    id-server: ${RUSTDESK_ID_SERVER:}
+    relay-server: ${RUSTDESK_RELAY_SERVER:}
+    api-server: ${RUSTDESK_API_SERVER:http://localhost:21114}
+    key: ${RUSTDESK_KEY:}
+    key-file: ${RUSTDESK_KEY_FILE:}
+    personal: true
+
+  ldap:
+    enabled: false
+    url: ${LDAP_URL:ldap://localhost:389}
+    base-dn: ${LDAP_BASE_DN:dc=example,dc=com}
+    bind-dn: ${LDAP_BIND_DN:cn=admin,dc=example,dc=com}
+    bind-password: ${LDAP_BIND_PASSWORD:}
+    user-base-dn: ${LDAP_USER_BASE_DN:}
+    user-filter: ${LDAP_USER_FILTER:(objectClass=person)}
+    username-attr: ${LDAP_USERNAME_ATTR:uid}
+    email-attr: ${LDAP_EMAIL_ATTR:mail}
+    first-name-attr: ${LDAP_FIRST_NAME_ATTR:givenName}
+    last-name-attr: ${LDAP_LAST_NAME_ATTR:sn}
+    admin-group: ${LDAP_ADMIN_GROUP:}
+    allow-group: ${LDAP_ALLOW_GROUP:}
+    sync: true
+    enable-attr: ${LDAP_ENABLE_ATTR:userAccountControl}
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.rustdesk.api: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/rustdesk-api.log
+    max-size: 10MB
+    max-history: 30
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Springdoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  packages-to-scan: com.rustdesk.api.controller
+  paths-to-match: /api/**
