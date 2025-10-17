@@ -4,10 +4,10 @@ import com.rustdesk.api.entity.Group;
 import com.rustdesk.api.entity.User;
 import com.rustdesk.api.repository.GroupRepository;
 import com.rustdesk.api.repository.UserRepository;
+import com.rustdesk.api.util.PasswordUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +26,6 @@ public class InitializationService {
 
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
-    private final PasswordEncoder passwordEncoder;
 
     private static final String DEFAULT_ADMIN_USERNAME = "admin";
     private static final String DEFAULT_ADMIN_PASSWORD = "admin@123";
@@ -94,7 +93,7 @@ public class InitializationService {
 
             User admin = new User();
             admin.setUsername(DEFAULT_ADMIN_USERNAME);
-            admin.setPassword(passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD));
+            admin.setPassword(PasswordUtil.encryptPassword(DEFAULT_ADMIN_PASSWORD));
             admin.setNickname("Administrator");
             admin.setIsAdmin(true);
             admin.setStatus(1);
@@ -146,7 +145,7 @@ public class InitializationService {
         }
 
         User admin = adminOpt.get();
-        admin.setPassword(passwordEncoder.encode(DEFAULT_ADMIN_PASSWORD));
+        admin.setPassword(PasswordUtil.encryptPassword(DEFAULT_ADMIN_PASSWORD));
         userRepository.save(admin);
 
         log.warn("Admin password has been reset to default");
@@ -200,7 +199,7 @@ public class InitializationService {
 
         User admin = new User();
         admin.setUsername(username);
-        admin.setPassword(passwordEncoder.encode(password));
+        admin.setPassword(PasswordUtil.encryptPassword(password));
         admin.setEmail(email);
         admin.setIsAdmin(true);
         admin.setStatus(1);

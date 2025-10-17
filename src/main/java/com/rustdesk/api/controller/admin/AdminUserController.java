@@ -1,12 +1,12 @@
 package com.rustdesk.api.controller.admin;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.rustdesk.api.dto.request.UserCreateRequest;
 import com.rustdesk.api.dto.response.ApiResponse;
 import com.rustdesk.api.dto.response.UserResponse;
 import com.rustdesk.api.entity.User;
 import com.rustdesk.api.exception.ApiException;
 import com.rustdesk.api.service.UserService;
-import com.rustdesk.api.util.JwtTokenProvider;
 import com.rustdesk.api.util.PasswordUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 public class AdminUserController {
 
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * Get Current Admin Info
@@ -257,35 +256,16 @@ public class AdminUserController {
     }
 
     /**
-     * Extract current user ID from JWT token
+     * Get current user ID from Sa-Token
      *
      * @param request HTTP request
      * @return User ID or null
      */
     private Long getCurrentUserId(HttpServletRequest request) {
-        String token = extractToken(request);
-        if (token == null) {
-            return null;
-        }
         try {
-            return jwtTokenProvider.getUserIdFromToken(token);
+            return StpUtil.getLoginIdAsLong();
         } catch (Exception e) {
-            log.error("Failed to extract user ID from token", e);
             return null;
         }
-    }
-
-    /**
-     * Extract token from request header
-     *
-     * @param request HTTP request
-     * @return Token string or null
-     */
-    private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
     }
 }

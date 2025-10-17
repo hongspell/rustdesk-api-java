@@ -1,10 +1,10 @@
 package com.rustdesk.api.controller.api;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.rustdesk.api.dto.request.PeerUpdateRequest;
 import com.rustdesk.api.dto.response.ApiResponse;
 import com.rustdesk.api.dto.response.PeerResponse;
 import com.rustdesk.api.entity.Peer;
-import com.rustdesk.api.entity.User;
 import com.rustdesk.api.service.PeerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,8 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -145,16 +143,15 @@ public class PeerController {
     }
 
     /**
-     * Get current user ID from SecurityContext
+     * Get current user ID from Sa-Token
      *
      * @return User ID or null
      */
     private Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof User) {
-            User user = (User) authentication.getPrincipal();
-            return user.getId();
+        try {
+            return StpUtil.getLoginIdAsLong();
+        } catch (Exception e) {
+            return null;
         }
-        return null;
     }
 }

@@ -17,10 +17,28 @@ spring:
       password:
       timeout: 3000ms
 
-  # Disable OAuth2 auto-configuration if no providers configured
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+############## Sa-Token Configuration ##############
+sa-token:
+  # Token name (also cookie name)
+  token-name: satoken
+  # Token timeout (in seconds, -1 means never expire)
+  timeout: 604800
+  # Active timeout (in seconds, -1 means never expire)
+  active-timeout: -1
+  # Whether to allow concurrent login from same account
+  is-concurrent: true
+  # Whether to share token across multiple devices
+  is-share: false
+  # Token style (random-32, random-64, random-128, uuid, simple-uuid)
+  token-style: uuid
+  # Whether to output logs
+  is-log: false
+  # Whether to read token from cookie
+  is-read-cookie: false
+  # Whether to read token from header
+  is-read-header: true
+  # Token prefix (e.g. "Bearer ")
+  token-prefix: "Bearer"
 
 rustdesk:
   app:

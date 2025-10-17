@@ -1,5 +1,7 @@
 package com.rustdesk.api.exception;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
 import com.rustdesk.api.dto.response.ApiResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -7,9 +9,6 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -55,39 +54,39 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle authentication exceptions (401)
+     * Handle Sa-Token not login exceptions (401)
      *
-     * @param ex      AuthenticationException
+     * @param ex      NotLoginException
      * @param request web request
      * @return error response
      */
-    @ExceptionHandler({AuthenticationException.class, BadCredentialsException.class})
-    public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(
-            AuthenticationException ex,
+    @ExceptionHandler(NotLoginException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotLoginException(
+            NotLoginException ex,
             WebRequest request
     ) {
-        log.error("Authentication failed: {}", ex.getMessage());
+        log.error("Not logged in: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error(401, "Authentication failed: " + ex.getMessage()));
+                .body(ApiResponse.error(401, "Authentication required: " + ex.getMessage()));
     }
 
     /**
-     * Handle access denied exceptions (403)
+     * Handle Sa-Token permission exceptions (403)
      *
-     * @param ex      AccessDeniedException
+     * @param ex      NotPermissionException
      * @param request web request
      * @return error response
      */
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(
-            AccessDeniedException ex,
+    @ExceptionHandler(NotPermissionException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotPermissionException(
+            NotPermissionException ex,
             WebRequest request
     ) {
-        log.error("Access denied: {}", ex.getMessage());
+        log.error("Permission denied: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error(403, "Access denied: " + ex.getMessage()));
+                .body(ApiResponse.error(403, "Permission denied: " + ex.getMessage()));
     }
 
     /**

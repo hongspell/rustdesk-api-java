@@ -2,9 +2,9 @@ package com.rustdesk.api.service;
 
 import com.rustdesk.api.entity.User;
 import com.rustdesk.api.repository.UserRepository;
+import com.rustdesk.api.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,6 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * Find user by ID
@@ -87,7 +86,7 @@ public class UserService {
         }
 
         // Encrypt password
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(PasswordUtil.encryptPassword(user.getPassword()));
 
         // Set default values if not provided
         if (user.getIsAdmin() == null) {
@@ -171,7 +170,7 @@ public class UserService {
         }
 
         // Verify password
-        if (passwordEncoder.matches(password, user.getPassword())) {
+        if (PasswordUtil.verifyPassword(password, user.getPassword())) {
             log.info("User authenticated successfully: {}", username);
             return Optional.of(user);
         }
@@ -202,13 +201,13 @@ public class UserService {
         User user = userOpt.get();
 
         // Verify old password
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if (!PasswordUtil.verifyPassword(oldPassword, user.getPassword())) {
             log.warn("Old password does not match for user: {}", userId);
             return false;
         }
 
         // Encode and set new password
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(PasswordUtil.encryptPassword(newPassword));
         userRepository.save(user);
 
         log.info("Password changed successfully for user: {}", userId);

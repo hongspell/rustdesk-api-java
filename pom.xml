@@ -24,8 +24,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <springdoc.version>2.5.0</springdoc.version>
-        <jjwt.version>0.12.5</jjwt.version>
-        <ldaptive.version>2.3.1</ldaptive.version>
+        <satoken.version>1.38.0</satoken.version>
+        <justauth.version>1.16.6</justauth.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
 
@@ -51,23 +51,26 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Sa-Token Authentication -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+            <version>${satoken.version}</version>
         </dependency>
 
+        <!-- Sa-Token Redis -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-redis-jackson</artifactId>
+            <version>${satoken.version}</version>
         </dependency>
 
-        <!-- LDAP support - optional -->
-        <!--
+        <!-- JustAuth Third-party Login -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-ldap</artifactId>
+            <groupId>me.zhyd.oauth</groupId>
+            <artifactId>JustAuth</artifactId>
+            <version>${justauth.version}</version>
         </dependency>
-        -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -104,26 +107,6 @@
             <artifactId>hibernate-community-dialects</artifactId>
         </dependency>
 
-        <!-- JWT -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>${jjwt.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
 
         <!-- API Documentation -->
         <dependency>
@@ -137,6 +120,13 @@
             <groupId>com.github.penggle</groupId>
             <artifactId>kaptcha</artifactId>
             <version>2.3.2</version>
+        </dependency>
+
+        <!-- BCrypt Password Encoder -->
+        <dependency>
+            <groupId>at.favre.lib</groupId>
+            <artifactId>bcrypt</artifactId>
+            <version>0.10.2</version>
         </dependency>
 
         <!-- Utilities -->
@@ -194,12 +184,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

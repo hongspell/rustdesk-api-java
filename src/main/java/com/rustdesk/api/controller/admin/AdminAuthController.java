@@ -1,5 +1,6 @@
 package com.rustdesk.api.controller.admin;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.rustdesk.api.dto.request.LoginRequest;
 import com.rustdesk.api.dto.request.RegisterRequest;
 import com.rustdesk.api.dto.response.ApiResponse;
@@ -10,7 +11,6 @@ import com.rustdesk.api.entity.UserToken;
 import com.rustdesk.api.service.LoginLogService;
 import com.rustdesk.api.service.UserService;
 import com.rustdesk.api.service.UserTokenService;
-import com.rustdesk.api.util.JwtTokenProvider;
 import com.rustdesk.api.util.PasswordUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,8 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 /**
  * Admin Authentication Controller
@@ -40,7 +38,6 @@ public class AdminAuthController {
     private final UserService userService;
     private final UserTokenService userTokenService;
     private final LoginLogService loginLogService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * Admin Login
@@ -82,10 +79,13 @@ public class AdminAuthController {
             return ApiResponse.forbidden("User account is inactive");
         }
 
-        // Save token to database (use MD5 token from UserTokenService)
+        // Use Sa-Token for login
+        StpUtil.login(user.getId());
+        String token = StpUtil.getTokenValue();
+        Long expiredAt = System.currentTimeMillis() + (StpUtil.getTokenTimeout() * 1000);
+
+        // Save token to database for compatibility
         UserToken userToken = userTokenService.createToken(user, request.getDeviceId(), request.getDeviceUuid());
-        String token = userToken.getToken();
-        Long expiredAt = userToken.getExpiredAt();
 
         // Log login
         loginLogService.createLog(user.getId(), "webadmin", "account",
@@ -123,11 +123,9 @@ public class AdminAuthController {
     @PostMapping("/logout")
     @Operation(summary = "Admin Logout", description = "Logout admin user and invalidate token")
     public ApiResponse<Void> logout(HttpServletRequest httpRequest) {
-        String token = extractToken(httpRequest);
-        if (token != null) {
-            userTokenService.deleteToken(token);
-            log.info("Admin logged out successfully");
-        }
+        // Sa-Token logout
+        StpUtil.logout();
+        log.info("Admin logged out successfully");
         return ApiResponse.success("Logout successful");
     }
 
@@ -174,17 +172,4 @@ public class AdminAuthController {
         return ApiResponse.success("User registered successfully", userResponse);
     }
 
-    /**
-     * Extract token from request header
-     *
-     * @param request HTTP request
-     * @return Token string or null
-     */
-    private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
 }

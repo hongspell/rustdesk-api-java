@@ -1,7 +1,7 @@
 package com.rustdesk.api.util;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.security.MessageDigest;
@@ -22,8 +22,8 @@ import java.util.HexFormat;
 @Component
 public class PasswordUtil {
 
-    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final int MD5_HEX_LENGTH = 32;
+    private static final int BCRYPT_COST = 10;
 
     /**
      * Encrypt password using BCrypt algorithm
@@ -36,7 +36,7 @@ public class PasswordUtil {
         if (password == null || password.isEmpty()) {
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
-        return passwordEncoder.encode(password);
+        return BCrypt.withDefaults().hashToString(BCRYPT_COST, password.toCharArray());
     }
 
     /**
@@ -63,7 +63,8 @@ public class PasswordUtil {
 
         // Verify using BCrypt
         try {
-            return passwordEncoder.matches(rawPassword, encodedPassword);
+            BCrypt.Result result = BCrypt.verifyer().verify(rawPassword.toCharArray(), encodedPassword);
+            return result.verified;
         } catch (Exception e) {
             log.error("Error verifying password: {}", e.getMessage());
             return false;
